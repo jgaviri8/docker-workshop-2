@@ -1,0 +1,34 @@
+<div>
+    <form [formGroup]="createProductForm" (ngSubmit)="onCreateProductFormSubmit(createProductForm.value)">
+        <div>
+            <label for="name">Nombre</label>
+            <input id="name" type="text" formControlName="name">
+        </div>
+        <div>
+            <label for="description">Descripción</label>
+            <input id="description" type="text" formControlName="description">
+        </div>
+        <div>
+            <label for="price">Precio</label>
+            <input id="price" type="number" formControlName="price">
+        </div>
+        <button type="submit">Crear producto</button>
+    </form>
+    <div>
+        <h3>Buscar</h3>
+        <form [formGroup]="searchProductForm" (ngSubmit)="onSearchProductFormSubmit(searchProductForm.value)">
+            <div>
+                <label for="name">Nombre</label>
+                <input id="name" type="text" formControlName="name">
+            </div>
+            <button type="submit">Buscar producto</button>
+        </form>
+    </div>
+    <div *ngFor="let product of products">
+            <span>{{product.name}}</span>
+            <p></p>
+            <span>{{product.description}}</span>
+            <p></p>
+            <span>{{product.price | currency }}</span>
+    </div>
+</div>
