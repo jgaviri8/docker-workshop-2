@@ -24,7 +24,7 @@
             <button type="submit">Buscar producto</button>
         </form>
     </div>
-    <div *ngFor="let product of products">
+    <div *ngFor="let product of products | async">
             <span>{{product.name}}</span>
             <p></p>
             <span>{{product.description}}</span>

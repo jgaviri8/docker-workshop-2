@@ -33,8 +33,7 @@ export class ProductComponent implements OnInit {
   }
 
   onSearchProductFormSubmit(data) {
-    this.products = [];
-    this.productService.searchProduct(data).subscribe(products=>this.products = products);
+    this.products = this.productService.searchProduct(data);
   }
 
 }
