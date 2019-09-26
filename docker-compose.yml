@@ -1,0 +1,8 @@
+version: '3.7'
+services:
+  mysql:
+    image: jgaviri8/products-db:0.0.1-SNAPSHOT
+    volumes:
+      - "products-db-data:/app"
+    networks:
+      - back_net
