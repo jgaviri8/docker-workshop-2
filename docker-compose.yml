@@ -6,3 +6,18 @@ services:
       - "products-db-data:/app"
     networks:
       - back_net
+  result-app:
+    build: ./ProductsAPI/.
+    ports:
+      - "8080:8080"
+    links:
+      - db
+    networks:
+      - front_net
+      - back_net
+volumes:
+  products-db-data:
+
+networks:
+  back_net:
+  front_net:
