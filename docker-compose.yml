@@ -1,20 +1,41 @@
 version: '3.7'
 services:
+  products-ng:
+    build: ./ProductsNG/.
+    image: jgaviri8/products-ng:0.0.1-SNAPSHOT
+    depends_on:
+      - products-api
+    container_name: products-ng
+    ports:
+      - "80:80"
+    links:
+      - products-api
+    networks:
+      - front_net
+  products-api:
+    build: ./ProductsAPI/.
+    image: jgaviri8/products-api:0.0.1-SNAPSHOT
+    environment:
+      - MYSQL_HOST=mysql
+    restart: on-failure
+    depends_on:
+      - mysql
+    container_name: products-api
+    ports:
+      - "8080:8080"
+    links:
+      - mysql
+    networks:
+      - front_net
+      - back_net
   mysql:
     image: jgaviri8/products-db:0.0.1-SNAPSHOT
+    container_name: mysql
     volumes:
       - "products-db-data:/app"
     networks:
       - back_net
-  result-app:
-    build: ./ProductsAPI/.
-    ports:
-      - "8080:8080"
-    links:
-      - db
-    networks:
-      - front_net
-      - back_net
+
 volumes:
   products-db-data:
 
