@@ -1,10 +1,12 @@
 package io.swagger.api;
 
+import io.swagger.infrastructure.persistence.ProductRepository;
 import io.swagger.model.Product;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import javax.validation.constraints.*;
 import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-09-20T03:43:35.949Z")
 
@@ -32,7 +35,10 @@ public class ProductApiController implements ProductApi {
 
     private final HttpServletRequest request;
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
     public ProductApiController(ObjectMapper objectMapper, HttpServletRequest request) {
         this.objectMapper = objectMapper;
         this.request = request;
@@ -41,8 +47,14 @@ public class ProductApiController implements ProductApi {
     public ResponseEntity<Product> addProduct(@ApiParam(value = "product object that needs to be added" ,required=true )  @Valid @RequestBody Product body) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
-            body.add(ControllerLinkBuilder.linkTo(ProductApi.class).slash(Long.valueOf(1L)).withSelfRel());
-            return new ResponseEntity<Product>(body, HttpStatus.NOT_IMPLEMENTED);
+            io.swagger.infrastructure.persistence.entities.Product dbProduct = new io.swagger.infrastructure.persistence.entities.Product();
+            dbProduct.setName(body.getName());
+            dbProduct.setDescription(body.getDescription());
+            dbProduct.setPrice(body.getPrice());
+            io.swagger.infrastructure.persistence.entities.Product persistedProduct = productRepository.save(dbProduct);
+            body.setProductId(persistedProduct.getProductId());
+            body.add(ControllerLinkBuilder.linkTo(ProductApi.class).slash(Long.valueOf(persistedProduct.getProductId().longValue())).withSelfRel());
+            return new ResponseEntity<Product>(body, HttpStatus.CREATED);
         }
 
         return new ResponseEntity<Product>(HttpStatus.NOT_IMPLEMENTED);
@@ -56,12 +68,16 @@ public class ProductApiController implements ProductApi {
     public ResponseEntity<List<Product>> findProductsByName(@NotNull @ApiParam(value = "part of the name to be considered for filtering", required = true) @Valid @RequestParam(value = "name", required = true) String name) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<List<Product>>(objectMapper.readValue("[ {  \"productId\" : 0,  \"price\" : 40.0,  \"name\" : \"T-Shirt\",  \"description\" : \"T-Shirt s, m, l sizes. Red, blue, green colors\"}, {  \"productId\" : 0,  \"price\" : 40.0,  \"name\" : \"T-Shirt\",  \"description\" : \"T-Shirt s, m, l sizes. Red, blue, green colors\"} ]", List.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<List<Product>>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+                List<Product> result = new ArrayList<>();
+                productRepository.findByName(name).forEach(dbProduct -> {
+                    Product product = new Product();
+                    product.setProductId(dbProduct.getProductId());
+                    product.name(dbProduct.getName());
+                    product.description(dbProduct.getDescription());
+                    product.price(dbProduct.getPrice());
+                    result.add(product);
+                });
+                return new ResponseEntity<List<Product>>(result, HttpStatus.OK);
         }
 
         return new ResponseEntity<List<Product>>(HttpStatus.NOT_IMPLEMENTED);

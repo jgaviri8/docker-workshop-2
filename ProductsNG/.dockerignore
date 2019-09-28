@@ -1,0 +1,5 @@
+dist
+Dockerfile
+README.md
+.gitignore
+.editorconfig
