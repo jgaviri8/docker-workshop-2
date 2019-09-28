@@ -19,7 +19,7 @@ constructor(
         'Accept': 'application/json'
       })
     };
-      this.httpClient.post('http://localhost:8080/jgaviri8/ProductsAPI/1.0.0/product', data, httpOptions).subscribe(product => {
+      this.httpClient.post('http://products-api.docker.localhost/jgaviri8/ProductsAPI/1.0.0/product', data, httpOptions).subscribe(product => {
       console.log('Product created', product);
     });
   }
@@ -34,6 +34,6 @@ constructor(
       params: new HttpParams().set('name', data.name)
     };
     console.log('opciones', httpOptions);
-    return this.httpClient.get('http://localhost:8080/jgaviri8/ProductsAPI/1.0.0/product/findByName', httpOptions);
+    return this.httpClient.get('http://products-api.docker.localhost/jgaviri8/ProductsAPI/1.0.0/product/findByName', httpOptions);
   }
 }

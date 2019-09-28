@@ -1,13 +1,32 @@
 version: '3.7'
 services:
+  reverse-proxy:
+    image: traefik:v2.0
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--providers.docker.exposedbydefault=false"
+    ports:
+      - "80:80"
+      - "8082:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - front_net
+      - back_net
   products-ng:
     build: ./ProductsNG/.
     image: jgaviri8/products-ng:0.0.1-SNAPSHOT
     depends_on:
       - products-api
-    container_name: products-ng
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.products-ng.rule=Host(`products-ng.docker.localhost`)"
+      - "traefik.http.routers.products-ng.entrypoints=web"
+      - "traefik.docker.network=docker-workshop-2_front_net"
     ports:
-      - "80:80"
+      - "80"
     links:
       - products-api
     networks:
@@ -20,9 +39,13 @@ services:
     restart: on-failure
     depends_on:
       - mysql
-    container_name: products-api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.products-api.rule=Host(`products-api.docker.localhost`)"
+      - "traefik.http.routers.products-api.entrypoints=web"
+      - "traefik.docker.network=docker-workshop-2_back_net"
     ports:
-      - "8080:8080"
+      - "8080"
     links:
       - mysql
     networks:
